@@ -65,7 +65,7 @@ def getStudents():
     for datum in data.each():
         print(datum.val())  
         bob.append(datum.val())
-    return bob
+    #return bob
     return data
     return {"data":"rr"}
 
