@@ -29,6 +29,17 @@ class UserInfo(BaseModel):
     email:str
     pw:str
 
+
+class CreateStudent(BaseModel):
+    birthday:str
+    emergencyContact:str
+    firstName:str
+    grade:int
+    lastName:str
+    school:str
+    username:str
+    email:str
+
 # class with optional fields, for PUT 
 class UpdateStudent(BaseModel):
     birthday:Optional[str]=None
@@ -41,15 +52,28 @@ class UpdateStudent(BaseModel):
     email:Optional[str]=None
 
 
-class CreateStudent(BaseModel):
+class CreateTeacher(BaseModel):
+    bio:str
     birthday:str
-    emergencyContact:str
     firstName:str
-    grade:int
     lastName:str
+    phone:str
+    subject:str
     school:str
     username:str
     email:str
+
+# class with optional fields, for PUT 
+class UpdateTeacher(BaseModel):
+    bio:Optional[str]=None
+    birthday:Optional[str]=None
+    firstName:Optional[str]=None
+    lastName:Optional[str]=None
+    phone:Optional[str]=None
+    subject:Optional[str]=None
+    school:Optional[str]=None
+    username:Optional[str]=None
+    email:Optional[str]=None
 
 
 @app.get("/")
