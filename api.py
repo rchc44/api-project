@@ -167,9 +167,10 @@ def deleteStudent(username:str):
 
 
 
+
     ## Teachers
 
-'''
+
 @app.get("/teachers/{username}") # get by id, username, email
 def getTeacher(username:str):
     data=db.child("teachers").order_by_child("username").equal_to(username).get()
@@ -184,19 +185,50 @@ def getTeacher(username:str):
     
 
 @app.post("/teachers")
-def createTeacher():
-    return {}
+def createTeacher(createTeacher:CreateTeacher):
+    dataTeacher=createTeacher.dict()
+    
+    teachers=db.child("teachers").get()
+    for teacher in teachers.each():
+        if teacher.val()['username'] == dataTeacher["username"]:
+            return {"message":"username already exists"}
+        
+    returnVal = db.child("teachers").push(dataTeacher)    
+    return returnVal # returns id of teacher
+
 
 @app.put("/teachers/{username}")
-def updateTeacher():
-    return {}
+def updateTeacher(username:str,updateTeacher:UpdateTeacher):
+    dataTeacher=updateTeacher.dict()
+    dataUpdate={}
+    
+    for key in dataTeacher:
+        if dataTeacher[key] is not None:
+            dataUpdate[key]=dataTeacher[key]    
+    
+    teachers=db.child("teachers").get()
+    for teacher in teachers.each():
+        if teacher.val()['username'] == username:
+            returnVal= db.child("teachers").child(teacher.key()).update(dataUpdate)    
+            return returnVal
+    
+    return {"message":"username not found"}
+
 
 @app.delete("/teachers/{username}")
-def deleteTeacher():
-    return {}
+def deleteTeacher(username:str):
+    teachers=db.child("teachers").get() # nodes of tree
+    for teacher in teachers.each():
+        if teacher.val()['username'] == username:
+            db.child("teachers").child(teacher.key()).remove()  
+            return {"message":"successfully removed"}
+    return {"message":"username not found"}
 
-'''
+
   
+  
+
+
     
   
     ## Students of Teachers
