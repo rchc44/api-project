@@ -1,8 +1,10 @@
-from fastapi import FastAPI,Path
+from fastapi import FastAPI,UploadFile,File
 from typing import Optional
 from pydantic import BaseModel
 import pyrebase
 import json
+import csv
+import codecs
 
 
 firebaseConfig = {
@@ -75,6 +77,12 @@ class UpdateTeacher(BaseModel):
     username:Optional[str]=None
     email:Optional[str]=None
 
+
+
+class CreateTest(BaseModel):
+    createdBy:str
+    testName:str
+    
 
 @app.get("/")
 def index():
@@ -191,7 +199,6 @@ def deleteStudent(username:str):
 
 
 
-
     ## Teachers
 
 
@@ -250,9 +257,6 @@ def deleteTeacher(username:str):
 
 
   
-  
-
-
     
   
     ## Students of Teachers
@@ -302,6 +306,103 @@ def deleteStudentFromTeacher(teacher_username:str,student_username:str):
             return returnVal
     
     return {"message":"teacher's not found"}
+
+
+
+
+	## Tests
+    
+    
+@app.get("/tests/{testName}") #get all questions of a test from db 
+def getTest(testName:str):
+    
+    data=db.child("tests").order_by_child("testName").equal_to(testName).get()
+    returnVal={}
+    
+    for datum in data.each():
+        returnVal["data"]=datum.val()
+        
+    if not returnVal:
+        returnVal["message"]="testName not found"        
+    return returnVal
+	 
+
+@app.post("/tests/{createdBy}") #upload/create new test -> csv to database format conversion
+async def testUpload(file:UploadFile,createdBy:str):
+    if file.content_type not in ["csv","application/vnd.ms-excel","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]:
+        return {"message":"Invalid document type"}
+    
+    csv_reader = csv.reader(codecs.iterdecode(file.file,'utf-8'))
+    
+    dataTest={}
+    dataTest["createdBy"]=createdBy
+    dataTest["testName"]=file.filename[:-4] # remove .csv
+    
+    dataQuestions={}
+    
+    cnt=0
+    for row in csv_reader:
+        if cnt==0:
+            cnt+=1
+            continue
+        if len(row)!=5:
+            return {"message":"Wrong question format"}
+        dataQuestion={}
+        dataQuestion["type"]=row[0]
+        dataQuestion["number"]=row[1]
+        dataQuestion["description"]=row[2]
+        dataQuestion["answer"]=row[3]
+        dataQuestion["options"]=row[4]
+        
+        dataQuestions[f"q{cnt}"]=dataQuestion
+        cnt+=1
+        print(dataQuestion)
+    dataTest["questions"]=dataQuestions
+    print(dataTest)
+    
+    
+    returnVal = db.child("tests").push(dataTest)  
+    return returnVal
+    #return {"FileName":file.filename}
+
+
+@app.delete("/tests/{testName}")
+def deleteTest(testName:str):
+    tests=db.child("tests").get() # nodes of tree
+    for test in tests.each():
+        if test.val()['testName'] == testName:
+            db.child("tests").child(test.key()).remove()  
+            return {"message":"successfully removed"}
+    return {"message":"testName not found"}
+
+
+
+    ## Submissions
+
+'''
+	# submissions
+
+
+
+GET /submissions/{studentId}
+	get all submissions by student
+GET /submissions/{testId}/students/{studentId}
+	get submission by student of specific test
+GET /submissions/tests/{testId}
+	get all submissions of a test
+	
+	
+POST /submissions/{studentId}
+	create new submission (student-provided answers to test)
+PUT /submissions/{studentId}
+	update student's submission
+DELETE /submissions/{studentId}
+	delete student's submission
+
+
+'''
+
+
 
 
 
