@@ -1,11 +1,11 @@
-from fastapi import FastAPI,UploadFile,File
+from fastapi import FastAPI,UploadFile
 from typing import Optional
 from pydantic import BaseModel
 import pyrebase
 import json
 import csv
 import codecs
-
+import copy
 
 firebaseConfig = {
   'apiKey': "AIzaSyA6DcIx3J8ZwJFes3EzAztL0rD8zK9PLC8",
@@ -83,6 +83,11 @@ class CreateTest(BaseModel):
     createdBy:str
     testName:str
     
+
+
+class CreateSubmission(BaseModel):
+    submission:list=[]
+    testName:str
 
 @app.get("/")
 def index():
@@ -379,10 +384,52 @@ def deleteTest(testName:str):
 
     ## Submissions
 
+
+@app.post("/submissions/{username}")
+def createSubmission(username:str,createSubmission:CreateSubmission):
+    # submission list [{providedAnswer:}]
+    # get test and store with submission
+    tests=db.child("tests").get() 
+    submissionData=createSubmission.dict()
+    
+    for test in tests.each():
+        if test.val()['testName'] == submissionData["testName"]:
+            # make sure number of submitted answers is equal to number of questions in test
+            if len(test.val()["questions"])!=len(submissionData["submission"]):
+                return {"message":"submission doesn't have all provided answers"}
+            
+            
+            newData=copy.deepcopy(test.val())
+            newData["username"]=username
+            
+            newData["submission"]=newData["questions"]
+            del newData["questions"]
+            
+            cnt=0
+            
+            
+            for k in newData["submission"]:
+                newData["submission"][k]["providedAnswer"]=submissionData["submission"][cnt]["providedAnswer"]
+                cnt+=1
+            db.child("submissions").push(newData)
+            
+            
+            return {"message":"successfully added submission"}
+        
+    return {"message":"testName not found"}
+
+
+@app.delete("/submissions/{username}/{testName}")
+def deleteSubmission(username:str,testName:str):
+    submissions=db.child("submissions").get() 
+    for submission in submissions.each():
+        if submission.val()['testName'] == testName and submission.val()["username"]==username:
+            db.child("submissions").child(submission.key()).remove()  
+            return {"message":"successfully removed"}
+    return {"message":"submission not found"}
+
+
 '''
-	# submissions
-
-
 
 GET /submissions/{studentId}
 	get all submissions by student
@@ -399,6 +446,18 @@ PUT /submissions/{studentId}
 DELETE /submissions/{studentId}
 	delete student's submission
 
+
+
+	# grades/results
+
+GET /grades/{studentId}
+	all grades of all student's submissions
+
+POST /grades/{testId}/students/{studentId}
+	upload grade for test, in submissions
+
+PUT /grades/{testId}/students/{studentId}
+	update grade for test
 
 '''
 
