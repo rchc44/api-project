@@ -89,6 +89,12 @@ class CreateSubmission(BaseModel):
     submission:list=[]
     testName:str
 
+
+class CreateGrade(BaseModel):
+    grade:int
+    
+
+
 @app.get("/")
 def index():
     return {"message":"Testing"}
@@ -428,6 +434,47 @@ def deleteSubmission(username:str,testName:str):
             return {"message":"successfully removed"}
     return {"message":"submission not found"}
 
+
+
+    ## Grades
+
+@app.get("/grades/{username}")
+def getGrades(username:str): #all grades of all student's submissions   
+    dataGrades={}
+    submissions=db.child("submissions").get() 
+    for submission in submissions.each():
+        if submission.val()["username"]==username:
+            testName=submission.val()["testName"]
+            if "grade" in submission.val():
+                dataGrades[testName]=submission.val()["grade"]
+            #return {"message":"successfully created Grade"}     
+    
+    if len(dataGrades)==0: 
+        return {"message":"No grades found"}
+    else: 
+        return dataGrades
+    
+    
+@app.post("/grades/{username}/{testName}")
+def createGrade(username:str,testName:str,createGrade:CreateGrade): # upload or update grade for test, in submissions
+    dataGrade=createGrade.dict()    
+    submissions=db.child("submissions").get() 
+    for submission in submissions.each():
+        if submission.val()['testName'] == testName and submission.val()["username"]==username:
+            db.child("submissions").child(submission.key()).update(dataGrade)  
+            return {"message":"successfully created Grade"}    
+    return {"message": "username or test not found"}
+   
+
+@app.delete("/grades/{username}/{testName}")
+def deleteGrade(username:str,testName:str): # delete grade for test, in submissions  
+    submissions=db.child("submissions").get() 
+    for submission in submissions.each():
+        if submission.val()['testName'] == testName and submission.val()["username"]==username:
+            db.child("submissions").child(submission.key()).update({"grade":None})  
+            return {"message":"successfully deleted Grade"}    
+    return {"message": "username or test not found"}
+  
 
 '''
 
