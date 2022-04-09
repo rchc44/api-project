@@ -390,6 +390,46 @@ def deleteTest(testName:str):
 
     ## Submissions
 
+@app.get("/submissions/{username}/{testName}") # get submission by student of specific test
+def getSpecificSubmission(username:str,testName:str):
+    submissions=db.child("submissions").get() 
+    for submission in submissions.each():
+        if submission.val()['testName'] == testName and submission.val()["username"]==username:
+            return submission
+    return {"message":"submission not found"}    
+
+
+@app.get("/submissions/{username}") # get all submissions by student
+def getAllSubmissions(username:str):
+    allSubmissions={}
+    cnt=0
+    submissions=db.child("submissions").get() 
+    for submission in submissions.each():
+        if submission.val()["username"]==username:
+            allSubmissions[f'submission{cnt}']=submission
+            cnt+=1
+    
+    if len(allSubmissions)>0:
+        return allSubmissions   
+    else: 
+        return {"message":"no submissions found"}
+
+
+@app.get("/tests/submissions/{testName}") # get all submissions of a test
+def getAllSubmissionsOfTest(testName:str):
+    allSubmissions={}
+    cnt=0
+    submissions=db.child("submissions").get() 
+    for submission in submissions.each():
+        if submission.val()["testName"]==testName:
+            allSubmissions[f'submission{cnt}']=submission
+            cnt+=1
+    
+    if len(allSubmissions)>0:
+        return allSubmissions   
+    else: 
+        return {"message":"no submissions found"}
+
 
 @app.post("/submissions/{username}")
 def createSubmission(username:str,createSubmission:CreateSubmission):
@@ -478,33 +518,11 @@ def deleteGrade(username:str,testName:str): # delete grade for test, in submissi
 
 '''
 
-GET /submissions/{studentId}
-	get all submissions by student
-GET /submissions/{testId}/students/{studentId}
-	get submission by student of specific test
-GET /submissions/tests/{testId}
-	get all submissions of a test
+
 	
-	
-POST /submissions/{studentId}
-	create new submission (student-provided answers to test)
 PUT /submissions/{studentId}
 	update student's submission
-DELETE /submissions/{studentId}
-	delete student's submission
 
-
-
-	# grades/results
-
-GET /grades/{studentId}
-	all grades of all student's submissions
-
-POST /grades/{testId}/students/{studentId}
-	upload grade for test, in submissions
-
-PUT /grades/{testId}/students/{studentId}
-	update grade for test
 
 '''
 
