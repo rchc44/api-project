@@ -519,7 +519,10 @@ def getGrades(username:str): #all grades of all student's submissions
     for submission in submissions.each():
         if submission.val()["username"]==username:
             if "grade" in submission.val():
-                grades.append({submission.val()["testName"]:submission.val()["grade"]})
+                grades.append({
+                    "testName":submission.val()["testName"],
+                    "grade":submission.val()["grade"]
+                })
     
     
     dataGrades["grades"]=grades
