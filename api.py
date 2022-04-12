@@ -100,7 +100,7 @@ def index():
     return {"message":"Testing"}
 
 
-
+'''
 # signup
 @app.post("/signup")
 def signup(userInfo:UserInfo,createStudent:CreateStudent):
@@ -137,22 +137,19 @@ def logout():
     return {}
 
 
-
+'''
 
     ## Students
     
 @app.get("/students")
 def getStudents():
     data=db.child("students").get()
-    return data
-    
-    '''
-    dataCleaned=[]
-    
+    cleanedData={}
+    students=[]
+    cleanedData["students"]=students
     for datum in data.each():
-        dataCleaned.append(datum.val())
-    return dataCleaned
-    '''
+        students.append(datum.val())
+    return cleanedData  
 
 
 @app.get("/students/{username}") # get by id, username, email
@@ -179,6 +176,7 @@ def createStudent(createStudent:CreateStudent):
         
     returnVal = db.child("students").push(dataStudent)    
     return returnVal # returns id of student
+
 
 @app.put("/students/{username}")
 def updateStudent(username:str,updateStudent:UpdateStudent):
@@ -220,9 +218,18 @@ def getTeacher(username:str):
     
     for datum in data.each():
         returnVal["data"]=datum.val()
+        students=[]
+        if "students" in returnVal["data"]:
+            tmp=returnVal["data"]["students"]
+            for student in tmp:
+                students.append(student)
+                
+        returnVal["data"]["students"]=students
+            
         
     if not returnVal:
-        returnVal["message"]="username not found"        
+        returnVal["message"]="username not found" 
+        
     return returnVal
     
 
@@ -332,6 +339,15 @@ def getTest(testName:str):
     
     for datum in data.each():
         returnVal["data"]=datum.val()
+        questions=[]
+        if "questions" in returnVal["data"]:
+            tmp=returnVal["data"]["questions"]
+            print(tmp,"tmp")
+            for question in tmp:
+                print(question)
+                questions.append(returnVal["data"]["questions"][question])
+        
+        returnVal["data"]["questions"]=questions
         
     if not returnVal:
         returnVal["message"]="testName not found"        
@@ -393,9 +409,16 @@ def deleteTest(testName:str):
 @app.get("/submissions/{username}/{testName}") # get submission by student of specific test
 def getSpecificSubmission(username:str,testName:str):
     submissions=db.child("submissions").get() 
+    cleanedData={}
+    lstConversion=[]
     for submission in submissions.each():
         if submission.val()['testName'] == testName and submission.val()["username"]==username:
-            return submission
+            #print(submission.val()) 
+            cleanedData["data"]=submission.val()
+            for datum in cleanedData["data"]["submission"]:
+                lstConversion.append(cleanedData["data"]["submission"][datum])
+            cleanedData["data"]["submission"]=lstConversion
+            return cleanedData
     return {"message":"submission not found"}    
 
 
