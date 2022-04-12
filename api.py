@@ -229,8 +229,13 @@ def getTeacher(username:str):
         
     if not returnVal:
         returnVal["message"]="username not found" 
+    
+    sortedData={}
+    sortedData["data"]={}
+    for k, v in returnVal["data"].items():
+        sortedData["data"][k]=v
         
-    return returnVal
+    return sortedData
     
 
 @app.post("/teachers")
