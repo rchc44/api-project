@@ -291,11 +291,12 @@ def getAllStudentsOfTeacher(username:str):
     data=db.child("teachers").order_by_child("username").equal_to(username).get()
     returnVal={}
     
+    students=[]
     for datum in data.each():
         if "students" in datum.val():
-            returnVal["data"]=datum.val()["students"]
-        else:
-            returnVal["data"]={}
+            for student in datum.val()["students"]:
+                students.append(student)
+        returnVal["data"]=students
         
     if not returnVal:
         returnVal["message"]="teacher's username not found"    
