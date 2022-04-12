@@ -430,32 +430,36 @@ def getSpecificSubmission(username:str,testName:str):
 
 @app.get("/submissions/{username}") # get all submissions by student
 def getAllSubmissions(username:str):
-    allSubmissions={}
-    cnt=0
-    submissions=db.child("submissions").get() 
+    submissions=db.child("submissions").get()
+    cleanedData={}
+    cleanedData["data"]={}
+    lst=[]
     for submission in submissions.each():
         if submission.val()["username"]==username:
-            allSubmissions[f'submission{cnt}']=submission
-            cnt+=1
+            print(submission.val())
+            lst.append(submission.val())
     
-    if len(allSubmissions)>0:
-        return allSubmissions   
+    cleanedData["data"]=lst
+    if len(lst)>0:
+        return cleanedData   
     else: 
         return {"message":"no submissions found"}
 
 
 @app.get("/tests/submissions/{testName}") # get all submissions of a test
 def getAllSubmissionsOfTest(testName:str):
-    allSubmissions={}
-    cnt=0
     submissions=db.child("submissions").get() 
+    cleanedData={}
+    cleanedData["data"]={}
+    lst=[]
     for submission in submissions.each():
         if submission.val()["testName"]==testName:
-            allSubmissions[f'submission{cnt}']=submission
-            cnt+=1
-    
-    if len(allSubmissions)>0:
-        return allSubmissions   
+            print(submission.val())
+            lst.append(submission.val()) 
+
+    cleanedData["data"]=lst
+    if len(lst)>0:
+        return cleanedData
     else: 
         return {"message":"no submissions found"}
 
@@ -511,18 +515,18 @@ def deleteSubmission(username:str,testName:str):
 def getGrades(username:str): #all grades of all student's submissions   
     dataGrades={}
     submissions=db.child("submissions").get() 
+    grades=[]
     for submission in submissions.each():
         if submission.val()["username"]==username:
-            testName=submission.val()["testName"]
             if "grade" in submission.val():
-                dataGrades[testName]=submission.val()["grade"]
-            #return {"message":"successfully created Grade"}     
+                grades.append({submission.val()["testName"]:submission.val()["grade"]})
     
-    if len(dataGrades)==0: 
-        return {"message":"No grades found"}
-    else: 
+    
+    dataGrades["grades"]=grades
+    if len(grades)>0: 
         return dataGrades
-    
+    else:
+        return {"message":"No grades found"}
     
 @app.post("/grades/{username}/{testName}")
 def createGrade(username:str,testName:str,createGrade:CreateGrade): # upload or update grade for test, in submissions
