@@ -348,9 +348,7 @@ def getTest(testName:str):
         questions=[]
         if "questions" in returnVal["data"]:
             tmp=returnVal["data"]["questions"]
-            print(tmp,"tmp")
             for question in tmp:
-                print(question)
                 questions.append(returnVal["data"]["questions"][question])
         
         returnVal["data"]["questions"]=questions
@@ -389,10 +387,7 @@ async def testUpload(file:UploadFile,createdBy:str):
         
         dataQuestions[f"q{cnt}"]=dataQuestion
         cnt+=1
-        print(dataQuestion)
     dataTest["questions"]=dataQuestions
-    print(dataTest)
-    
     
     returnVal = db.child("tests").push(dataTest)  
     return returnVal
@@ -419,7 +414,6 @@ def getSpecificSubmission(username:str,testName:str):
     lstConversion=[]
     for submission in submissions.each():
         if submission.val()['testName'] == testName and submission.val()["username"]==username:
-            #print(submission.val()) 
             cleanedData["data"]=submission.val()
             for datum in cleanedData["data"]["submission"]:
                 lstConversion.append(cleanedData["data"]["submission"][datum])
@@ -427,6 +421,13 @@ def getSpecificSubmission(username:str,testName:str):
             return cleanedData
     return {"message":"submission not found"}    
 
+
+
+def cleanSubmission(data):
+    cleanedData=[]
+    for q in data:
+        cleanedData.append(data[q])
+    return cleanedData
 
 @app.get("/submissions/{username}") # get all submissions by student
 def getAllSubmissions(username:str):
@@ -436,7 +437,10 @@ def getAllSubmissions(username:str):
     lst=[]
     for submission in submissions.each():
         if submission.val()["username"]==username:
-            print(submission.val())
+            cleanedSubmission=cleanSubmission(submission.val()["submission"])
+            submission.val()["submission"]=cleanedSubmission
+            if "grade" in submission.val():
+                del submission.val()["grade"]            
             lst.append(submission.val())
     
     cleanedData["data"]=lst
@@ -444,6 +448,7 @@ def getAllSubmissions(username:str):
         return cleanedData   
     else: 
         return {"message":"no submissions found"}
+
 
 
 @app.get("/tests/submissions/{testName}") # get all submissions of a test
@@ -454,9 +459,12 @@ def getAllSubmissionsOfTest(testName:str):
     lst=[]
     for submission in submissions.each():
         if submission.val()["testName"]==testName:
-            print(submission.val())
-            lst.append(submission.val()) 
-
+            cleanedSubmission=cleanSubmission(submission.val()["submission"])
+            submission.val()["submission"]=cleanedSubmission
+            if "grade" in submission.val():
+                del submission.val()["grade"]
+            lst.append(submission.val())
+            
     cleanedData["data"]=lst
     if len(lst)>0:
         return cleanedData
