@@ -313,11 +313,14 @@ def addStudentToTeacher(teacher_username:str,student_username:str):
             for student in students.each():
                 if student.val()['username'] == student_username:
                     returnVal= db.child("teachers").child(teacher.key()).child("students").update({student_username:True})    
-                    return returnVal
+                    
+                    returnObj={}
+                    for student in returnVal:
+                        returnObj["student"]=student
+                    
+                    return returnObj
             return {"message":"student's username not found"}
     return {"message":"teacher's username not found"}
-
-
 
 
 
@@ -327,8 +330,12 @@ def deleteStudentFromTeacher(teacher_username:str,student_username:str):
     for teacher in teachers.each():
         if teacher.val()['username'] == teacher_username:
             returnVal= db.child("teachers").child(teacher.key()).child("students").update({student_username:None})    
-            return returnVal
-    
+
+            returnObj={}
+            for student in returnVal:
+                returnObj["student"]=student
+            
+            return returnObj
     return {"message":"teacher's not found"}
 
 
