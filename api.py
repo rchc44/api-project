@@ -218,8 +218,8 @@ def getTeachers():
     
     cleanedData["teachers"]=teachers
     for datum in data.each():
+	students=[]
         if "students" in datum.val():
-            students=[]
             for student in datum.val()["students"]:
                 students.append(student)
         datum.val()["students"]=students
