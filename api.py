@@ -210,6 +210,24 @@ def deleteStudent(username:str):
 
     ## Teachers
 
+@app.get("/teachers")
+def getTeachers():
+    data=db.child("teachers").get()
+    cleanedData={}
+    teachers=[]
+    
+    cleanedData["teachers"]=teachers
+    for datum in data.each():
+        if "students" in datum.val():
+            students=[]
+            for student in datum.val()["students"]:
+                students.append(student)
+        datum.val()["students"]=students
+        teachers.append(datum.val())
+    
+                
+    return cleanedData  
+
 
 @app.get("/teachers/{username}") # get by id, username, email
 def getTeacher(username:str):
@@ -342,6 +360,18 @@ def deleteStudentFromTeacher(teacher_username:str,student_username:str):
 
 
 	## Tests
+
+
+@app.get("/tests")
+def getTests():
+    data=db.child("tests").get()
+    cleanedData={}
+    tests=[]
+    cleanedData["tests"]=tests
+    for datum in data.each():
+        tests.append(datum.val()["testName"])
+    return cleanedData  
+
     
     
 @app.get("/tests/{testName}") #get all questions of a test from db 
