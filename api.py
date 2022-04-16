@@ -218,8 +218,8 @@ def getTeachers():
     
     cleanedData["teachers"]=teachers
     for datum in data.each():
+        students=[]
         if "students" in datum.val():
-            students=[]
             for student in datum.val()["students"]:
                 students.append(student)
         datum.val()["students"]=students
@@ -363,7 +363,7 @@ def deleteStudentFromTeacher(teacher_username:str,student_username:str):
 
 
 @app.get("/tests")
-def getTests():
+def getTestNames():
     data=db.child("tests").get()
     cleanedData={}
     tests=[]
@@ -397,14 +397,20 @@ def getTest(testName:str):
 
 @app.post("/tests/{createdBy}") #upload/create new test -> csv to database format conversion
 async def testUpload(file:UploadFile,createdBy:str):
-    if file.content_type not in ["csv","application/vnd.ms-excel","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]:
-        return {"message":"Invalid document type"}
+    fileTypes=["csv","application/vnd.ms-excel","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]
     
+    if "csv" not in file.content_type:
+        return {"message":"Invalid document type"}
+        
     csv_reader = csv.reader(codecs.iterdecode(file.file,'utf-8'))
     
     dataTest={}
     dataTest["createdBy"]=createdBy
     dataTest["testName"]=file.filename[:-4] # remove .csv
+    
+    if dataTest["testName"] in getTestNames()["tests"]:
+        return {"message":"testName already exists"}
+    
     
     dataQuestions={}
     
