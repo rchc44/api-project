@@ -174,8 +174,8 @@ def createStudent(createStudent:CreateStudent):
         if student.val()['username'] == dataStudent["username"]:
             return {"message":"username already exists"}
         
-    returnVal = db.child("students").push(dataStudent)    
-    return returnVal # returns id of student
+    db.child("students").push(dataStudent)    
+    return {"username":dataStudent["username"]} # returns id of student
 
 
 @app.put("/students/{username}")
@@ -265,8 +265,9 @@ def createTeacher(createTeacher:CreateTeacher):
         if teacher.val()['username'] == dataTeacher["username"]:
             return {"message":"username already exists"}
         
-    returnVal = db.child("teachers").push(dataTeacher)    
-    return returnVal # returns id of teacher
+    db.child("teachers").push(dataTeacher)    
+    return {"username":dataTeacher["username"]}
+    #return returnVal # returns id of teacher
 
 
 @app.put("/teachers/{username}")
@@ -343,6 +344,7 @@ def addStudentToTeacher(teacher_username:str,student_username:str):
                     return returnObj
             return {"message":"student's username not found"}
     return {"message":"teacher's username not found"}
+
 
 
 
@@ -462,8 +464,8 @@ async def testUpload(file:UploadFile,createdBy:str):
         cnt+=1
     dataTest["questions"]=dataQuestions
     
-    returnVal = db.child("tests").push(dataTest)  
-    return returnVal
+    db.child("tests").push(dataTest)  
+    return {"testName":dataTest["testName"]}
     #return {"FileName":file.filename}
 
 
