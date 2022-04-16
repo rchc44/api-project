@@ -300,7 +300,7 @@ def deleteTeacher(username:str):
   
     
   
-    ## Students of Teachers
+    ## Students of Teachers, given teacher_username, return student usernames
 
 
 
@@ -308,6 +308,7 @@ def deleteTeacher(username:str):
 def getAllStudentsOfTeacher(username:str):
     data=db.child("teachers").order_by_child("username").equal_to(username).get()
     returnVal={}
+
     
     students=[]
     for datum in data.each():
@@ -318,6 +319,9 @@ def getAllStudentsOfTeacher(username:str):
         
     if not returnVal:
         returnVal["message"]="teacher's username not found"    
+
+
+
         
     return returnVal
     
@@ -357,6 +361,32 @@ def deleteStudentFromTeacher(teacher_username:str,student_username:str):
     return {"message":"teacher's not found"}
 
 
+
+
+    ## Teachers of students, given student_username, return teacher usernames
+
+
+@app.get("/students/{username}/teachers") # get by id, username, email
+def getAllTeachersOfStudent(username:str):
+    data=db.child("teachers").get()
+    returnVal={}
+
+
+    findStudent=getStudent(username)
+    if "data" not in findStudent:
+        returnVal["message"]="student's username not found"    
+        return returnVal
+
+    teachers=[]
+    for datum in data.each():
+        print(datum.val())
+        if "students" in datum.val():
+            if username in datum.val()["students"]:
+               teachers.append(datum.val()["username"]) 
+        returnVal["teachers"]=teachers
+        
+    return returnVal
+    
 
 
 	## Tests
