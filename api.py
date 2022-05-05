@@ -29,6 +29,8 @@ app=FastAPI()
 
 origins = [
     "https://rchc44.github.io",
+    "https://rchc44.github.io/cosmoquizz_web/",
+    "https://rchc44.github.io/cosmoquizz_web",
 ]
 
 app.add_middleware(
