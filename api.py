@@ -35,15 +35,7 @@ origins = [
 ]
 '''
 
-origins = ["*"]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 class UserInfo(BaseModel):
     email:str
@@ -117,6 +109,17 @@ class CreateGrade(BaseModel):
 def index():
     return {"message":"Testing"}
 
+
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 '''
 # signup
