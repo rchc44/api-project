@@ -107,7 +107,7 @@ class CreateGrade(BaseModel):
 
 @app.get("/")
 def index():
-    return {"message":"Welcome"}
+    return {"message":"Welcome page"}
 
 
 
