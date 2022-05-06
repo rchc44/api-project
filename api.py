@@ -107,7 +107,7 @@ class CreateGrade(BaseModel):
 
 @app.get("/")
 def index():
-    return {"message":"Testing"}
+    return {"message":"Welcome"}
 
 
 
@@ -117,7 +117,7 @@ app.add_middleware(CORSMiddleware,
 allow_origins=["*"],
 allow_credentials=True,
 allow_methods=["*"],
-allow_headers=["*"],)
+allow_headers=["*"])
 '''
 # signup
 @app.post("/signup")
