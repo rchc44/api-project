@@ -20,8 +20,10 @@ Get all data of all students
 None
 
 #### Sample Response Body:
+
 {
   "students": [
+    
     {
       "birthday": "01/01/1999",
       "email": "bobbob@gmail.com",
@@ -42,7 +44,9 @@ None
       "school": "Baruch College",
       "username": "joejoe"
     }
+  
   ]
+
 }
 
 ### GET /students/{username}
