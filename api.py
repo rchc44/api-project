@@ -27,14 +27,6 @@ auth=firebase.auth()
 
 app=FastAPI()
 
-'''
-origins = [
-    "https://rchc44.github.io",
-    "https://rchc44.github.io/cosmoquizz_web/",
-    "https://rchc44.github.io/cosmoquizz_web",
-]
-'''
-
 
 
 class UserInfo(BaseModel):
@@ -114,11 +106,16 @@ def index():
 
 
 app.add_middleware(CORSMiddleware,
-allow_origins=["*"],
+allow_origins=["*"], 
 allow_credentials=True,
 allow_methods=["*"],
 allow_headers=["*"])
+
+
+
 '''
+    # sign in/up log in/out authentication, switched to handling directly to firebase
+
 # signup
 @app.post("/signup")
 def signup(userInfo:UserInfo,createStudent:CreateStudent):
@@ -632,6 +629,7 @@ def getGrades(username:str): #all grades of all student's submissions
     else:
         return {"message":"No grades found"}
     
+    
 @app.post("/grades/{username}/{testName}")
 def createGrade(username:str,testName:str,createGrade:CreateGrade): # upload or update grade for test, in submissions
     dataGrade=createGrade.dict()    
@@ -653,15 +651,6 @@ def deleteGrade(username:str,testName:str): # delete grade for test, in submissi
     return {"message": "username or test not found"}
   
 
-'''
-
-
-	
-PUT /submissions/{studentId}
-	update student's submission
-
-
-'''
 
 
 
